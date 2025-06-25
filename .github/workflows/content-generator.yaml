@@ -1,9 +1,9 @@
-name: Weekly AutoPost with Telegram
+name: Weekly AutoPost with Telegram + Archive
 
 on:
   schedule:
-    - cron: '0 10 * * 1'  # Every Monday at 10 AM UTC
-  workflow_dispatch:      # Also allows manual trigger
+    - cron: '0 10 * * 1'  # Every Monday 10AM UTC
+  workflow_dispatch:
 
 jobs:
   autopost:
@@ -19,7 +19,7 @@ jobs:
           LINE=$(shuf -n 1 resources.txt)
           echo "RLINE=$LINE" >> $GITHUB_ENV
 
-      - name: Append block to HTML
+      - name: Append block to index.html
         run: |
           IFS='|' read -ra PARTS <<< "$RLINE"
           CATEGORY=${PARTS[0]}
@@ -34,16 +34,39 @@ jobs:
           </div>
           " >> index.html
 
+      - name: Rebuild archive.html from index.html
+        run: |
+          echo "<!DOCTYPE html>
+          <html lang='en'>
+          <head>
+            <meta charset='UTF-8'>
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <title>EduDrop Archive</title>
+            <link rel='stylesheet' href='style.css'>
+          </head>
+          <body class='glass-section'>
+          <main>
+          <h1>📚 EduDrop Archive</h1>" > archive.html
+
+          # Extract all div.card blocks
+          grep -o '<div class=.card[^>]*>.*</div>' index.html >> archive.html
+
+          echo "</main></body></html>" >> archive.html
+
       - name: Commit and push
         run: |
           git config --global user.email "autobot@edudrop.com"
           git config --global user.name "EduDrop Bot"
-          git add index.html
+          git add index.html archive.html
           git commit -m "Auto-posted: $RLINE"
           git push
 
       - name: Post to Telegram
         run: |
+          IFS='|' read -ra PARTS <<< "$RLINE"
+          CATEGORY=${PARTS[0]}
+          TITLE=${PARTS[1]}
+
           MESSAGE="📘 New Resource Posted!\n\n[$CATEGORY] $TITLE\n🔗 https://yourusername.github.io/edudrop"
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
           -d chat_id='@EduDropChannel' \
