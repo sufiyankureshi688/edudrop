@@ -1,0 +1,32 @@
+name: Weekly AutoPost
+
+on:
+  schedule:
+    - cron: '0 10 * * 1'  # every Monday at 10AM UTC
+  workflow_dispatch:
+
+jobs:
+  autopost:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+
+      - name: Generate new content block
+        run: |
+          echo '
+          <div class="card">
+            <h2>[Free Resource] Weekly UPSC Insight PDF</h2>
+            <p>Top topics covered from current affairs and editorials.</p>
+            <a href="https://t.me/EduDropChannel" class="button">📥 Join Telegram to Download</a>
+          </div>
+          ' >> index.html
+
+      - name: Commit and push
+        run: |
+          git config --global user.email "autobot@edudrop.com"
+          git config --global user.name "EduDrop Bot"
+          git add index.html
+          git commit -m "Weekly auto-post"
+          git push
