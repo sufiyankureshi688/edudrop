@@ -2,51 +2,122 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EduDrop – Free Study Material</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EduDrop – Free PDF Resources</title>
   <link rel="stylesheet" href="style.css" />
-  <meta name="description" content="Access free, high-quality educational PDFs for UPSC, Coding, IELTS and more. Join our Telegram to download.">
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.11/firebase-database.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+  </script>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: #0e1014;
+      color: #f0f0f0;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 1.5rem;
+      border-radius: 1rem;
+      margin-bottom: 1.5rem;
+      backdrop-filter: blur(10px);
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.01);
+    }
+
+    .button {
+      display: inline-block;
+      margin-top: 0.8rem;
+      padding: 0.5rem 1rem;
+      background: linear-gradient(90deg, #7f00ff, #00ffcc);
+      color: white;
+      border-radius: 0.5rem;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    #footer {
+      margin-top: 4rem;
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    .stats {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+      color: #ccc;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>📘 EduDrop</h1>
-    <p>Free PDFs for UPSC, Coding, IELTS, SSC and more – Join Telegram to Download</p>
-  </header>
-
   <main>
-    <div class="card">
-      <h2>[UPSC] Prelims Notes 2025 – All Subjects</h2>
-      <p>Concise notes covering History, Polity, Economy, Environment & more.</p>
-      <a href="https://t.me/EduDropChannel" target="_blank" class="button">📥 Join Telegram to Download</a>
+    <h1>📚 EduDrop — Free Study PDFs</h1>
+
+    <!-- Example Card -->
+    <div class="card" onclick="trackView('NCERT History Summary')">
+      <h2>[UPSC] NCERT History Summary</h2>
+      <p>Class 6–12 NCERT notes for quick revision.</p>
+      <a href="https://t.me/EduDropChannel" class="button" onclick="event.stopPropagation(); trackDownload('NCERT History Summary')">
+        📥 Join Telegram to Download
+      </a>
+      <p class="stats" id="stats-NCERT History Summary">👁️ 0 · 📥 0</p>
     </div>
 
-    <div class="card">
-      <h2>[DSA] Quick Revision Guide</h2>
-      <p>Perfect for placements – Arrays, Trees, Graphs, DP, Sorting and Searching.</p>
-      <a href="https://t.me/EduDropChannel" target="_blank" class="button">📥 Join Telegram to Download</a>
-    </div>
+    <!-- Auto-posted cards from GitHub Actions will appear below -->
 
-    <div class="card">
-      <h2>[IELTS] Band 9 Sample Essays</h2>
-      <p>Model essays with structure breakdowns. Academic + General Training.</p>
-      <a href="https://t.me/EduDropChannel" target="_blank" class="button">📥 Join Telegram to Download</a>
-    </div>
-
-    <div class="card">
-      <h2>[SSC] Quantitative Aptitude Shortcuts</h2>
-      <p>Speed up your calculations. Master common question types.</p>
-      <a href="https://t.me/EduDropChannel" target="_blank" class="button">📥 Join Telegram to Download</a>
-    </div>
-
-    <div class="card">
-      <h2>[SEM 3] Computer Science Notes</h2>
-      <p>DBMS, OS, DAA, COA and more in clean handwritten format.</p>
-      <a href="https://t.me/EduDropChannel" target="_blank" class="button">📥 Join Telegram to Download</a>
-    </div>
+    <p><a href="archive.html" class="button">📂 View All Resources (Archive)</a></p>
   </main>
 
-  <footer>
-    <p>&copy; 2025 EduDrop. Built for learners.</p>
-  </footer>
+  <div id="footer">
+    Made with ❤️ for learners. Updated weekly.
+  </div>
+
+  <script>
+    function trackView(title) {
+      const ref = db.ref('stats/' + title);
+      ref.child('views').transaction(n => (n || 0) + 1);
+    }
+
+    function trackDownload(title) {
+      const ref = db.ref('stats/' + title);
+      ref.child('downloads').transaction(n => (n || 0) + 1);
+    }
+
+    function loadStats(title) {
+      const ref = db.ref('stats/' + title);
+      ref.on('value', (snapshot) => {
+        const data = snapshot.val() || { views: 0, downloads: 0 };
+        document.getElementById('stats-' + title).textContent =
+          `👁️ ${data.views} · 📥 ${data.downloads}`;
+      });
+    }
+
+    // Load stats on first card
+    loadStats('NCERT History Summary');
+  </script>
 </body>
 </html>
