@@ -2,7 +2,7 @@ name: Weekly AutoPost
 
 on:
   schedule:
-    - cron: '0 10 * * 1'  # every Monday at 10AM UTC
+    - cron: '0 10 * * 1'
   workflow_dispatch:
 
 jobs:
@@ -13,20 +13,31 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v2
 
-      - name: Generate new content block
+      - name: Pick a random resource
+        id: pick
         run: |
-          echo '
-          <div class="card">
-            <h2>[Free Resource] Weekly UPSC Insight PDF</h2>
-            <p>Top topics covered from current affairs and editorials.</p>
-            <a href="https://t.me/EduDropChannel" class="button">📥 Join Telegram to Download</a>
+          LINE=$(shuf -n 1 resources.txt)
+          echo "RLINE=$LINE" >> $GITHUB_ENV
+
+      - name: Append block to HTML
+        run: |
+          IFS='|' read -ra PARTS <<< "$RLINE"
+          CATEGORY=${PARTS[0]}
+          TITLE=${PARTS[1]}
+          LINK=${PARTS[2]}
+
+          echo "
+          <div class='card'>
+            <h2>[${CATEGORY}] ${TITLE}</h2>
+            <p>Get the latest resource and boost your prep.</p>
+            <a href='${LINK}' class='button'>📥 Join Telegram to Download</a>
           </div>
-          ' >> index.html
+          " >> index.html
 
       - name: Commit and push
         run: |
           git config --global user.email "autobot@edudrop.com"
           git config --global user.name "EduDrop Bot"
           git add index.html
-          git commit -m "Weekly auto-post"
+          git commit -m "Auto-posted: $RLINE"
           git push
