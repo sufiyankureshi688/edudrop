@@ -41,3 +41,8 @@ jobs:
           git add index.html
           git commit -m "Auto-posted: $RLINE"
           git push
+      - name: Post to Telegram
+        run: |
+          curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
+          -d chat_id='@EduDropChannel' \
+          -d text='📘 New Study Resource posted! Check it out:\nhttps://yourusername.github.io/edudrop'
