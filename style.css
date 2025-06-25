@@ -1,0 +1,77 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #121212;
+  color: #f1f1f1;
+  line-height: 1.6;
+}
+
+header {
+  text-align: center;
+  padding: 30px 20px 10px;
+  border-bottom: 1px solid #333;
+}
+
+header h1 {
+  font-size: 2.5em;
+  color: #00ffe0;
+}
+
+header p {
+  color: #bbb;
+  font-size: 1em;
+  margin-top: 5px;
+}
+
+main {
+  max-width: 800px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+.card {
+  background: #1e1e1e;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+  box-shadow: 0 0 8px rgba(0, 255, 255, 0.05);
+  border-left: 4px solid #00ffe0;
+}
+
+.card h2 {
+  font-size: 1.3em;
+  margin-bottom: 10px;
+}
+
+.card p {
+  color: #ccc;
+  margin-bottom: 15px;
+}
+
+.button {
+  display: inline-block;
+  background: linear-gradient(90deg, #00ffe0, #4facfe);
+  padding: 10px 20px;
+  color: black;
+  text-decoration: none;
+  font-weight: bold;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+.button:hover {
+  background: linear-gradient(90deg, #4facfe, #00ffe0);
+}
+
+footer {
+  text-align: center;
+  padding: 20px 0;
+  font-size: 0.9em;
+  color: #888;
+  border-top: 1px solid #333;
+}
