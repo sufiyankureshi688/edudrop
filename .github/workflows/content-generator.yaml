@@ -1,8 +1,8 @@
-name: Weekly AutoPost with Telegram + Archive
+name: Weekly AutoPost with Telegram + Archive + Filters
 
 on:
   schedule:
-    - cron: '0 10 * * 1'  # Every Monday 10AM UTC
+    - cron: '0 10 * * 1'  # Every Monday at 10AM UTC
   workflow_dispatch:
 
 jobs:
@@ -27,10 +27,11 @@ jobs:
           LINK=${PARTS[2]}
 
           echo "
-          <div class='card'>
+          <div class='card' data-title='${TITLE}' data-category='${CATEGORY}' onclick=\"trackView('${TITLE}')\">
             <h2>[${CATEGORY}] ${TITLE}</h2>
             <p>Get the latest resource and boost your prep.</p>
-            <a href='${LINK}' class='button'>📥 Join Telegram to Download</a>
+            <a href='${LINK}' class='button' onclick=\"event.stopPropagation(); trackDownload('${TITLE}')\">📥 Join Telegram to Download</a>
+            <p class='stats' id='stats-${TITLE}'>👁️ 0 · 📥 0</p>
           </div>
           " >> index.html
 
@@ -39,21 +40,82 @@ jobs:
           echo "<!DOCTYPE html>
           <html lang='en'>
           <head>
-            <meta charset='UTF-8'>
-            <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <meta charset='UTF-8' />
+            <meta name='viewport' content='width=device-width, initial-scale=1.0'/>
             <title>EduDrop Archive</title>
-            <link rel='stylesheet' href='style.css'>
+            <link rel='stylesheet' href='style.css' />
+            <style>
+              body {
+                background: #0e1014;
+                color: #f0f0f0;
+                font-family: 'Segoe UI', sans-serif;
+                padding: 2rem;
+              }
+              input, select {
+                padding: 0.6rem 1rem;
+                border-radius: 0.5rem;
+                border: none;
+                margin-right: 1rem;
+                margin-bottom: 1rem;
+              }
+              .card {
+                background: rgba(255,255,255,0.05);
+                padding: 1.5rem;
+                border-radius: 1rem;
+                margin-bottom: 1.5rem;
+              }
+              .hidden {
+                display: none;
+              }
+            </style>
           </head>
-          <body class='glass-section'>
-          <main>
-          <h1>📚 EduDrop Archive</h1>" > archive.html
+          <body>
+            <h1>📚 EduDrop Archive</h1>
+            <input type='text' id='searchInput' placeholder='Search by keyword...' />
+            <select id='categoryFilter'>
+              <option value=''>All Categories</option>
+              <option value='UPSC'>UPSC</option>
+              <option value='Coding'>Coding</option>
+              <option value='GATE'>GATE</option>
+              <option value='Notes'>Notes</option>
+              <option value='Other'>Other</option>
+            </select>
+            <div id='cardContainer'>" > archive.html
 
-          # Extract all div.card blocks
+          # Append all cards
           grep -o '<div class=.card[^>]*>.*</div>' index.html >> archive.html
 
-          echo "</main></body></html>" >> archive.html
+          echo "</div>
+          <script>
+            const searchInput = document.getElementById('searchInput');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const cards = document.querySelectorAll('.card');
 
-      - name: Commit and push
+            function filterCards() {
+              const query = searchInput.value.toLowerCase();
+              const selectedCategory = categoryFilter.value;
+
+              cards.forEach(card => {
+                const title = card.dataset.title.toLowerCase();
+                const category = card.dataset.category;
+                const matchesTitle = title.includes(query);
+                const matchesCategory = !selectedCategory || category === selectedCategory;
+
+                if (matchesTitle && matchesCategory) {
+                  card.classList.remove('hidden');
+                } else {
+                  card.classList.add('hidden');
+                }
+              });
+            }
+
+            searchInput.addEventListener('input', filterCards);
+            categoryFilter.addEventListener('change', filterCards);
+          </script>
+          </body>
+          </html>" >> archive.html
+
+      - name: Commit and push changes
         run: |
           git config --global user.email "autobot@edudrop.com"
           git config --global user.name "EduDrop Bot"
