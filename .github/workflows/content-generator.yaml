@@ -1,9 +1,9 @@
-name: Weekly AutoPost
+name: Weekly AutoPost with Telegram
 
 on:
   schedule:
-    - cron: '0 10 * * 1'
-  workflow_dispatch:
+    - cron: '0 10 * * 1'  # Every Monday at 10 AM UTC
+  workflow_dispatch:      # Also allows manual trigger
 
 jobs:
   autopost:
@@ -41,8 +41,10 @@ jobs:
           git add index.html
           git commit -m "Auto-posted: $RLINE"
           git push
+
       - name: Post to Telegram
         run: |
+          MESSAGE="📘 New Resource Posted!\n\n[$CATEGORY] $TITLE\n🔗 https://yourusername.github.io/edudrop"
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_TOKEN }}/sendMessage \
           -d chat_id='@EduDropChannel' \
-          -d text='📘 New Study Resource posted! Check it out:\nhttps://yourusername.github.io/edudrop'
+          -d text="$MESSAGE"
